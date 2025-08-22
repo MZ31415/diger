@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>diger</title>
+    <link rel="icon" href="/diger/icon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: rgb(34, 34, 34);
+            color: rgb(255, 255, 255);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .title-omega {
+            text-transform: lowercase;
+            font-size: 2.8rem;
+            display: inline-block;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 0 auto;
+        }
+        
+        .thumbnail {
+            width: 190px;
+            height: 90px;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .thumbnail:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .thumbnail:hover img {
+            transform: scale(1.1);
+        }
+        
+        .thumbnail::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .thumbnail:hover::after {
+            opacity: 1;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 80%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+        
+        .image-info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            padding: 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 25px 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 20px;
+            }
+            
+            .thumbnail {
+                width: 150px;
+                height: 75px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .title-omega {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 15px;
+            }
+            
+            .thumbnail {
+                width: 130px;
+                height: 65px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .title-omega {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+        
+        /* 加载动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .thumbnail {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .thumbnail:nth-child(2) { animation-delay: 0.1s; }
+        .thumbnail:nth-child(3) { animation-delay: 0.2s; }
+        .thumbnail:nth-child(4) { animation-delay: 0.3s; }
+        .thumbnail:nth-child(5) { animation-delay: 0.4s; }
+        .thumbnail:nth-child(6) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>铪基醚- <span class="title-omega">ω</span></h1>
+            <p class="subtitle">我是不是很闲? Do I look idle to me?</p>
+        </header>
+        
+        <main>
+            <div class="gallery" id="gallery">
+                <!-- 缩略图将通过JavaScript动态添加 -->
+            </div>
+        </main>
+        
+        <div class="modal" id="modal">
+            <div class="close-btn" id="closeBtn">&lt;</div>
+            <img class="modal-content" id="modalImage">
+            <div class="image-info" id="imageInfo"></div>
+        </div>
+        
+        <footer>
+            <p>diger 2025 | - ω -</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gallery = document.getElementById('gallery');
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            const closeBtn = document.getElementById('closeBtn');
+            const imageInfo = document.getElementById('imageInfo');
+            
+            // 图片数据
+            const images = [
+                { name: "0", filename: "0.png" },
+                { name: "1", filename: "1.png" },
+                { name: "2", filename: "2.png" },
+                { name: "3", filename: "3.png" },
+                { name: "4", filename: "4.png" },
+                { name: "5", filename: "5.png" },
+                { name: "6", filename: "6.png" },
+                { name: "7", filename: "7.png" },
+                { name: "8", filename: "8.png" },
+                { name: "9", filename: "9.png" },
+                { name: "10", filename: "10.png" }
+            ];
+
+            const imageBasePath = '/diger/';
+            
+            // 创建缩略图
+            images.forEach((image, index) => {
+                const thumbnailDiv = document.createElement('div');
+                thumbnailDiv.className = 'thumbnail';
+                thumbnailDiv.style.animationDelay = `${index * 0.1}s`;
+                
+                const img = document.createElement('img');
+                img.src = `${imageBasePath}${image.filename}`;
+                img.alt = image.name;
+                
+                // 添加加载错误处理
+                img.onerror = function() {
+                    thumbnailDiv.style.display = 'none';
+                };
+                
+                thumbnailDiv.appendChild(img);
+                
+                // 添加点击事件
+                thumbnailDiv.addEventListener('click', function() {
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('active'), 10);
+                    modalImage.src = this.querySelector('img').src;
+                    imageInfo.textContent = image.name;
+                });
+                
+                gallery.appendChild(thumbnailDiv);
+            });
+            
+            // 关闭模态框
+            closeBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            });
+            
+            // 点击模态框背景也可以关闭
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }
+            });
+            
+            // 添加键盘支持
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.style.display === 'flex') {
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+        // 感谢 deepseek 写的html文件. (qwq
+    </script>
+</body>
+</html>
